@@ -15,8 +15,7 @@
   "author": "Pedro Ladaria <pedro.ladaria@gmail.com>",
   "license": "MIT",
   "dependencies": {
-    "lodash.noop": "^3.0.1",
-    "tape": "^4.5.1"
+    "lodash.noop": "^3.0.1"
   },
   "devDependencies": {}
 }

@@ -43,12 +43,12 @@ Console output:
 ```javascript
 const lexer = require('xml-lexer').create();
 
-const xmlChunk1 = `<hello><greet`; // note this
-const xmlChunk2 = `ing>Hello, world!</greeting></hello>`;
+const chunk1 = `<hello><greet`; // note this
+const chunk2 = `ing>Hello, world!</greeting></hello>`;
 
 lexer.on('data', (data) => console.log(data));
-lexer.write(xmlChunk1);
-lexer.write(xmlChunk2);
+lexer.write(chunk1);
+lexer.write(chunk2);
 
 /*
 Console output:
@@ -66,10 +66,8 @@ Console output:
 ```javascript
 const lexer = require('xml-lexer').create();
 
-const xml = `<"<hello>hi</hello attr="value">`;
-
 lexer.on('data', (data) => console.log(data));
-lexer.write(xml);
+lexer.write(`<"<hello>hi</hello attr="value">`);
 
 /*
 Console output (note the open-tag value):
@@ -83,17 +81,14 @@ Console output (note the open-tag value):
 ## Example: update state machine to fix document errors
 
 ```javascript
-const Lexer = require('./src/lexer');
-
+const Lexer = require('xml-lexer');
 const lexer = Lexer.create();
 
 lexer.stateMachine[Lexer.State.tagBegin][Lexer.Action.lt] = () => {};
 lexer.stateMachine[Lexer.State.tagName][Lexer.Action.error] = () => {};
 
-const xml = `<<hello">hi</hello attr="value">`;
-
 lexer.on('data', (data) => console.log(data));
-lexer.write(xml);
+lexer.write(`<<hello">hi</hello attr="value">`);
 
 /*
 Console output (note the fixed open-tag value):

@@ -1,0 +1,5 @@
+env:
+  node: true
+  es6: true
+rules:
+  no-unused-vars: 2

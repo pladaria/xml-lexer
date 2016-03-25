@@ -1,0 +1,21 @@
+{
+  "name": "xml-lexer",
+  "version": "0.0.1",
+  "description": "XML Lexer",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "xml",
+    "lexer",
+    "lex",
+    "grammar"
+  ],
+  "author": "Pedro Ladaria <pedro.ladaria@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "lodash.noop": "^3.0.1",
+    "tape": "^4.5.1"
+  }
+}

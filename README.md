@@ -67,7 +67,7 @@ Console output:
 const lexer = require('xml-lexer').create();
 
 lexer.on('data', (data) => console.log(data));
-lexer.write(`<"<hello>hi</hello attr="value">`);
+lexer.write(`<<hello">hi</hello attr="value">`);
 
 /*
 Console output (note the open-tag value):

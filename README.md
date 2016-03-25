@@ -1,7 +1,7 @@
 # XML Lexer (WIP)
 
 Simple lexer for XML documents
-- Very small!
+- Very small! (~250 LOC)
 - Works in Browser, Node.js or React Native
 - Fast and simple
 - Fault tolerant
@@ -74,7 +74,7 @@ lexer.write(xmlWithErrors);
 /*
 Console output (note the fixed open-tag value):
 
-{ type: 'open-tag', value: '"<hello' }
+{ type: 'open-tag', value: '<hello"' }
 { type: 'data', value: 'hi' }
 { type: 'close-tag', value: 'hello' }
 */
@@ -92,32 +92,33 @@ const lexer = Lexer.create();
 const noop = function () {}; // do nothing
 
 // update state machine
-lexer.stateMachine[State.tagBegin][Action.doubleQuote] = noop;
 lexer.stateMachine[State.tagBegin][Action.lt] = noop;
+lexer.stateMachine[State.tagName][Action.error] = noop;
 
-const xmlWithErrors = `<"<hello>hi</hello attr="value">`;
+const xmlWithErrors = `<<hello">hi</hello attr="value">`;
 
 lexer.on('data', (data) => console.log(data));
 lexer.write(xmlWithErrors);
 
 /*
-Console output (note the open-tag value):
+Console output (note the fixed open-tag value):
 
 { type: 'open-tag', value: 'hello' }
 { type: 'data', value: 'hi' }
 { type: 'close-tag', value: 'hello' }
 */
 ```
-## To do
+## To do (ordered by priority)
 
+- Tests
+- ES5 bundle with webpack
 - Stream interface (allow piping)
+- Improve and extract event-emitter to separate module (or reuse some other one)
+- DEV/PRODUCTION modes
 - Special treatment for Prolog and document type declaration
 - Special treatment for XML Comments
 - Special treatment for CDATA Sections
 - Entities
-- Extract event-emitter to separate module (or reuse some other one)
-- ES5 bundle with webpack
-- Tests
 
 ## License
 

@@ -1,6 +1,6 @@
 'use strict';
 
-const EventListener = require('../event-listener');
+const EventEmitter = require('../event-emitter');
 const noop = require('lodash.noop');
 
 const State = {
@@ -52,7 +52,7 @@ const getAction = (char) => charToAction[char] || Action.char;
 
 const create = () => {
 
-    const lexer = new EventListener();
+    const lexer = new EventEmitter();
 
     let state = State.data;
     let data = '';

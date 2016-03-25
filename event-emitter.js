@@ -16,17 +16,17 @@ if (typeof setImmediate === 'function') {
     immediate = (fn) => setTimeout(fn, 0);
 }
 
-const EventListener = function () {
+const EventEmitter = function () {
     this._listeners = {};
 };
 
-EventListener.prototype.emit = function (event, arg) {
+EventEmitter.prototype.emit = function (event, arg) {
     if (Array.isArray(this._listeners[event])) {
         this._listeners[event].forEach(fn => immediate(() => fn(arg)));
     }
 };
 
-EventListener.prototype.addListener = function (event, fn) {
+EventEmitter.prototype.addListener = function (event, fn) {
     if (Array.isArray(this._listeners[event])) {
         if (!this._listeners[event].some(fn)) {
             this._listeners[event].push(fn);
@@ -36,12 +36,12 @@ EventListener.prototype.addListener = function (event, fn) {
     }
 };
 
-EventListener.prototype.on = EventListener.prototype.addListener;
+EventEmitter.prototype.on = EventEmitter.prototype.addListener;
 
-EventListener.prototype.removeListener = function (event, fn) {
+EventEmitter.prototype.removeListener = function (event, fn) {
     if (Array.isArray(this._listeners[event])) {
         this._listeners[event] = this._listeners[event].filter(f => f !== fn);
     }
 };
 
-module.exports = EventListener;
+module.exports = EventEmitter;

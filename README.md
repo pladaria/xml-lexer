@@ -2,7 +2,7 @@
 
 Simple lexer for XML documents
 - Very small! (~250 LOC)
-- Works in Browser, Node.js or React Native
+- Works in Browser, WebWorkers, ServiceWorkers, Node.js or React Native
 - Fast and simple
 - Fault tolerant
 - Easy to extend (state machine is exposed in Lexer instances)

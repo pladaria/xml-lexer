@@ -66,13 +66,13 @@ Console output:
 ```javascript
 const lexer = require('xml-lexer').create();
 
-const xmlWithErrors = `<"<hello>hi</hello attr="value">`;
+const xml = `<"<hello>hi</hello attr="value">`;
 
 lexer.on('data', (data) => console.log(data));
-lexer.write(xmlWithErrors);
+lexer.write(xml);
 
 /*
-Console output (note the fixed open-tag value):
+Console output (note the open-tag value):
 
 { type: 'open-tag', value: '<hello"' }
 { type: 'data', value: 'hi' }
@@ -84,21 +84,16 @@ Console output (note the fixed open-tag value):
 
 ```javascript
 const Lexer = require('./src/lexer');
-const State = Lexer.State;
-const Action = Lexer.Action;
 
 const lexer = Lexer.create();
 
-const noop = function () {}; // do nothing
+lexer.stateMachine[Lexer.State.tagBegin][Lexer.Action.lt] = () => {};
+lexer.stateMachine[Lexer.State.tagName][Lexer.Action.error] = () => {};
 
-// update state machine
-lexer.stateMachine[State.tagBegin][Action.lt] = noop;
-lexer.stateMachine[State.tagName][Action.error] = noop;
-
-const xmlWithErrors = `<<hello">hi</hello attr="value">`;
+const xml = `<<hello">hi</hello attr="value">`;
 
 lexer.on('data', (data) => console.log(data));
-lexer.write(xmlWithErrors);
+lexer.write(xml);
 
 /*
 Console output (note the fixed open-tag value):

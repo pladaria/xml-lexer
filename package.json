@@ -17,5 +17,6 @@
   "dependencies": {
     "lodash.noop": "^3.0.1",
     "tape": "^4.5.1"
-  }
+  },
+  "devDependencies": {}
 }

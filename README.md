@@ -102,7 +102,6 @@ Console output (note the fixed open-tag value):
 
 - ES5 bundle with webpack
 - Stream interface (allow piping)
-- Improve and extract event-emitter to separate module (or reuse some other one)
 - Special treatment for Prolog and document type declaration
 - Special treatment for XML Comments
 - Special treatment for CDATA Sections

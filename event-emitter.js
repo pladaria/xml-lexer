@@ -18,7 +18,7 @@ EventEmitter.prototype.emit = function (event, arg) {
 
 EventEmitter.prototype.addListener = function (event, fn) {
     if (Array.isArray(this._listeners[event])) {
-        if (!this._listeners[event].some(fn)) {
+        if (this._listeners[event].every(f => f !== fn)) {
             this._listeners[event].push(fn);
         }
     } else {

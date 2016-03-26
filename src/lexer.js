@@ -28,7 +28,7 @@ const Action = {
 };
 
 const Type = {
-    data: 'data',
+    text: 'text',
     openTag: 'open-tag',
     closeTag: 'close-tag',
     attributeName: 'attribute-name',
@@ -79,7 +79,7 @@ const create = (options) => {
             [Action.lt]: () => {
                 const text = data.trim();
                 if (text) {
-                    emitData(Type.data, text);
+                    emitData(Type.text, text);
                 }
                 tagName = '';
                 isClosing = false;

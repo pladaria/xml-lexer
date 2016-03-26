@@ -22,7 +22,7 @@ test('happy case', t => {
     const xml = `<test>text</test>`;
     const expected = [
         {type: Type.openTag, value: 'test'},
-        {type: Type.data, value: 'text'},
+        {type: Type.text, value: 'text'},
         {type: Type.closeTag, value: 'test'},
     ];
     assert(t, lexer, xml, expected);
@@ -33,7 +33,7 @@ test('happy case chunked', t => {
     const xml = `<test>text</test>`.split('');
     const expected = [
         {type: Type.openTag, value: 'test'},
-        {type: Type.data, value: 'text'},
+        {type: Type.text, value: 'text'},
         {type: Type.closeTag, value: 'test'},
     ];
     assert(t, lexer, xml, expected);

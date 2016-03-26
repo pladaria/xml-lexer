@@ -39,7 +39,19 @@ test('happy case chunked', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('different attributes (single, double, no quotes, no value)', t => {
+test('single attribute without quotes', t => {
+    const lexer = Lexer.create();
+    const xml = `<test a=1></test>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.attributeName, value: 'a'},
+        {type: Type.attributeValue, value: '1'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test('various attributes (single, double, no quotes, no value)', t => {
     const lexer = Lexer.create();
     const xml = `<test a=0 b='1' c="2" d></test>`;
     const expected = [
@@ -57,7 +69,7 @@ test('different attributes (single, double, no quotes, no value)', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('different attributes without spaces', t => {
+test('various attributes without spaces', t => {
     const lexer = Lexer.create();
     const xml = `<test a='1'b="2"c></test>`;
     const expected = [

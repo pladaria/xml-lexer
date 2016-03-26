@@ -225,6 +225,10 @@ const create = (options) => {
                     attrValue += char;
                 }
             },
+            [Action.gt]: () => {
+                emitData(Type.attributeValue, attrValue);
+                state = State.data;
+            },
             [Action.doubleQuote]: (char) => {
                 if (quoteStyle === 2) {
                     emitData(Type.attributeValue, attrValue);

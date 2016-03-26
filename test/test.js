@@ -96,7 +96,7 @@ test('self closing tag', t => {
 });
 
 test('self closing tag with slash after attribute value', t => {
-    const lexer = Lexer.create({debug:true});
+    const lexer = Lexer.create();
     const xml = `<test a=1/>`;
     const expected = [
         {type: Type.openTag, value: 'test'},

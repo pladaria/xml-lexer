@@ -1,7 +1,7 @@
 'use strict';
 
 const EventEmitter = require('../event-emitter');
-const noop = require('lodash.noop');
+const noop = () => {};
 
 const State = {
     data: Symbol('state-data'),
@@ -50,10 +50,14 @@ const charToAction = {
 
 const getAction = (char) => charToAction[char] || Action.char;
 
-const create = () => {
-
+/**
+ * @param  {Object} options
+ * @param  {Boolean} options.debug
+ * @return {Object}
+ */
+const create = (options) => {
+    options = Object.assign({debug: false}, options);
     const lexer = new EventEmitter();
-
     let state = State.data;
     let data = '';
     let tagName = '';
@@ -62,7 +66,13 @@ const create = () => {
     let isClosing = '';
     let quoteStyle = 0; // 0: none; 1: single; 2: double
 
-    const emitData = (type, value) => lexer.emit('data', {type, value});
+    const emitData = (type, value) => {
+        const data = {type, value};
+        if (options.debug) {
+            console.log('emit:', data);
+        }
+        lexer.emit('data', data);
+    };
 
     lexer.stateMachine = {
         [State.data]: {
@@ -110,7 +120,7 @@ const create = () => {
             },
             [Action.slash]: () => {
                 state = State.tagEnd;
-                emitData(Type.closeTag, tagName);
+                emitData(Type.openTag, tagName);
             },
             [Action.char]: (char) => (tagName += char),
         },
@@ -227,8 +237,8 @@ const create = () => {
         },
     };
 
-    const transition = (char) => {
-        // console.log('\t\t\t', state, char);
+    const next = (char) => {
+        options.debug && console.log(state, char);
         const actions = lexer.stateMachine[state];
         const action = actions[getAction(char)]
             || actions[Action.error]
@@ -239,7 +249,7 @@ const create = () => {
     lexer.write = (str) => {
         const len = str.length;
         for (let i = 0; i < len; i++) {
-            transition(str[i]);
+            next(str[i]);
         }
     };
 

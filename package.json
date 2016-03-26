@@ -15,7 +15,9 @@
   ],
   "author": "Pedro Ladaria <pedro.ladaria@gmail.com>",
   "license": "MIT",
-  "dependencies": {},
+  "dependencies": {
+    "eventemitter3": "^1.2.0"
+  },
   "devDependencies": {
     "tape": "^4.5.1"
   },

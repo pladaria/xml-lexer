@@ -1,6 +1,6 @@
 'use strict';
 
-const EventEmitter = require('../event-emitter');
+const EventEmitter = require('eventemitter3');
 const noop = () => {};
 
 const State = {

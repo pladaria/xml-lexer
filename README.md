@@ -2,6 +2,7 @@
 
 Simple lexer for XML documents
 - Very small! (~250 LOC)
+- Event driven API (SAX-like)
 - Works in Browser, WebWorkers, ServiceWorkers, Node.js or React Native
 - Fast and simple
 - Fault tolerant

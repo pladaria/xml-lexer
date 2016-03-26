@@ -95,6 +95,18 @@ test('self closing tag', t => {
     assert(t, lexer, xml, expected);
 });
 
+test('self closing tag with slash after attribute value', t => {
+    const lexer = Lexer.create({debug:true});
+    const xml = `<test a=1/>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.attributeName, value: 'a'},
+        {type: Type.attributeValue, value: '1'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
 test('attributes are ignored after slash in self closing tag', t => {
     const lexer = Lexer.create();
     const xml = `<test/ a=0>`;

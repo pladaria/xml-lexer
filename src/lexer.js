@@ -229,6 +229,11 @@ const create = (options) => {
                 emitData(Type.attributeValue, attrValue);
                 state = State.data;
             },
+            [Action.slash]: () => {
+                emitData(Type.attributeValue, attrValue);
+                isClosing = true;
+                state = State.tagEnd;
+            },
             [Action.doubleQuote]: (char) => {
                 if (quoteStyle === 2) {
                     emitData(Type.attributeValue, attrValue);

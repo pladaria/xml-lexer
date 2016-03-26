@@ -10,6 +10,7 @@
     "xml",
     "lexer",
     "lex",
+    "sax",
     "grammar",
     "state machine"
   ],

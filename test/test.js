@@ -126,3 +126,43 @@ test('attributes are ignored in closing tag', t => {
     ];
     assert(t, lexer, xml, expected);
 });
+
+test('ignore tags starting with ?', t => {
+    const lexer = Lexer.create();
+    const xml = `<?xml foo=bar><test/>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test('ignore comments', t => {
+    const lexer = Lexer.create();
+    const xml = `<test><!-- comment --></test>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test('ignore CDATA', t => {
+    const lexer = Lexer.create();
+    const xml = `<test><![CDATA[foo]]></test>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test('ignore DOCTYPE', t => {
+    const lexer = Lexer.create();
+    const xml = `<!DOCTYPE foo><test/>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});

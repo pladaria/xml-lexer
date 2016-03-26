@@ -103,9 +103,9 @@ Console output (note the fixed open-tag value):
 
 - ES5 bundle with webpack
 - Stream interface (allow piping)
-- Special treatment for Prolog and document type declaration
-- Special treatment for XML Comments
-- Special treatment for CDATA Sections
+- Prolog and document type declaration (now ignored)
+- XML Comments (now ignored)
+- CDATA (now ignored)
 - Entities
 
 ## License

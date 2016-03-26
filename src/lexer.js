@@ -67,6 +67,10 @@ const create = (options) => {
     let quoteStyle = 0; // 0: none; 1: single; 2: double
 
     const emitData = (type, value) => {
+        // for now, ignore tags like: '?xml', '!DOCTYPE', '![CDATA[' or comments
+        if (tagName[0] === '?' || tagName[0] === '!') {
+            return;
+        }
         const data = {type, value};
         if (options.debug) {
             console.log('emit:', data);

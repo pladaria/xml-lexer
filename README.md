@@ -1,4 +1,4 @@
-# XML Lexer (WIP)
+# Javascript XML Lexer
 
 Simple lexer for XML documents
 - Very small, fast and simple! (~250 sloc)
@@ -7,7 +7,7 @@ Simple lexer for XML documents
 - Fault tolerant
 - Easy to extend/fine tune (state machine is exposed in Lexer instances)
 
-If you are looking for a [XML Reader/Parser to convert XML documents into JS objects](https://github.com/pladaria/xml-reader), check my other project: [xml-reader](https://github.com/pladaria/xml-reader)
+If you are looking for a [XML Reader/Parser to convert XML documents into Javascript objects](https://github.com/pladaria/xml-reader), check my other project: [xml-reader](https://github.com/pladaria/xml-reader)
 
 ## Install
 

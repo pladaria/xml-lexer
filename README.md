@@ -14,7 +14,9 @@ Simple lexer for XML documents
 npm install --save xml-lexer
 ```
 
-## Example: happy case
+## Examples
+
+### Happy case
 
 ```javascript
 const lexer = require('xml-lexer').create();
@@ -39,7 +41,7 @@ Console output:
 { type: 'close-tag', value: 'hello' }
 */
 ```
-## Example: chunked processing
+### Chunked processing
 
 ```javascript
 const lexer = require('xml-lexer').create();
@@ -62,7 +64,7 @@ Console output:
 */
 ```
 
-## Example: document with errors
+### Document with errors
 
 ```javascript
 const lexer = require('xml-lexer').create();
@@ -79,7 +81,7 @@ Console output (note the open-tag value):
 */
 ```
 
-## Example: update state machine to fix document errors
+### Update state machine to fix document errors
 
 ```javascript
 const Lexer = require('xml-lexer');

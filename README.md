@@ -1,12 +1,13 @@
 # XML Lexer (WIP)
 
 Simple lexer for XML documents
-- Very small! (~250 LOC)
+- Very small, fast and simple! (~250 sloc)
 - Event driven API (SAX-like)
 - Works in Browser, WebWorkers, ServiceWorkers, Node.js or React Native
-- Fast and simple
 - Fault tolerant
-- Easy to extend (state machine is exposed in Lexer instances)
+- Easy to extend/fine tune (state machine is exposed in Lexer instances)
+
+If you are looking for a XML Reader/Parser to convert XML documents into JS objects, have a look at [xml-reader](https://github.com/pladaria/xml-reader)
 
 ## Install
 

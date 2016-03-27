@@ -233,10 +233,14 @@ const create = (options) => {
                 emitData(Type.attributeValue, attrValue);
                 state = State.data;
             },
-            [Action.slash]: () => {
-                emitData(Type.attributeValue, attrValue);
-                isClosing = true;
-                state = State.tagEnd;
+            [Action.slash]: (char) => {
+                if (quoteStyle === 0) {
+                    emitData(Type.attributeValue, attrValue);
+                    isClosing = true;
+                    state = State.tagEnd;
+                } else {
+                    attrValue += char;
+                }
             },
             [Action.doubleQuote]: (char) => {
                 if (quoteStyle === 2) {

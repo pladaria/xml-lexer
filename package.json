@@ -1,6 +1,6 @@
 {
   "name": "xml-lexer",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "description": "XML Lexer",
   "main": "index.js",
   "scripts": {

@@ -20,8 +20,7 @@ const Action = {
     gt: Symbol('action-gt'),
     space: Symbol('action-space'),
     equal: Symbol('action-equal'),
-    singleQuote: Symbol('action-single-quote'),
-    doubleQuote: Symbol('action-double-quote'),
+    quote: Symbol('action-quote'),
     slash: Symbol('action-slash'),
     char: Symbol('action-char'),
     error: Symbol('action-error'),
@@ -42,8 +41,8 @@ const charToAction = {
     '\r': Action.space,
     '<': Action.lt,
     '>': Action.gt,
-    '"': Action.doubleQuote,
-    "'": Action.singleQuote,
+    '"': Action.quote,
+    "'": Action.quote,
     '=': Action.equal,
     '/': Action.slash,
 };
@@ -64,7 +63,7 @@ const create = (options) => {
     let attrName = '';
     let attrValue = '';
     let isClosing = '';
-    let quoteStyle = 0; // 0: none; 1: single; 2: double
+    let openingQuote = '';
 
     const emitData = (type, value) => {
         // for now, ignore tags like: '?xml', '!DOCTYPE', '![CDATA[' or comments
@@ -152,11 +151,11 @@ const create = (options) => {
             },
         },
         [State.attributeName]: {
+            [Action.space]: () => (state = State.attributeNameEnd),
             [Action.equal]: () => {
                 emitData(Type.attributeName, attrName);
                 state = State.attributeValueBegin;
             },
-            [Action.space]: () => (state = State.attributeNameEnd),
             [Action.gt]: () => {
                 attrValue = '';
                 emitData(Type.attributeName, attrName);
@@ -191,13 +190,8 @@ const create = (options) => {
         },
         [State.attributeValueBegin]: {
             [Action.space]: noop,
-            [Action.singleQuote]: () => {
-                quoteStyle = 1;
-                attrValue = '';
-                state = State.attributeValue;
-            },
-            [Action.doubleQuote]: () => {
-                quoteStyle = 2;
+            [Action.quote]: (char) => {
+                openingQuote = char;
                 attrValue = '';
                 state = State.attributeValue;
             },
@@ -207,66 +201,62 @@ const create = (options) => {
                 state = State.data;
             },
             [Action.char]: (char) => {
-                quoteStyle = 0;
+                openingQuote = '';
                 attrValue = char;
                 state = State.attributeValue;
             },
         },
         [State.attributeValue]: {
             [Action.space]: (char) => {
-                if (quoteStyle === 0) {
+                if (openingQuote) {
+                    attrValue += char;
+                } else {
+                    emitData(Type.attributeValue, attrValue);
+                    state = State.attributeNameStart;
+                }
+            },
+            [Action.quote]: (char) => {
+                if (openingQuote === char) {
                     emitData(Type.attributeValue, attrValue);
                     state = State.attributeNameStart;
                 } else {
                     attrValue += char;
                 }
             },
-            [Action.singleQuote]: (char) => {
-                if (quoteStyle === 1) {
-                    emitData(Type.attributeValue, attrValue);
-                    state = State.attributeNameStart;
-                } else {
+            [Action.gt]: (char) => {
+                if (openingQuote) {
                     attrValue += char;
+                } else {
+                    emitData(Type.attributeValue, attrValue);
+                    state = State.data;
                 }
-            },
-            [Action.gt]: () => {
-                emitData(Type.attributeValue, attrValue);
-                state = State.data;
             },
             [Action.slash]: (char) => {
-                if (quoteStyle === 0) {
+                if (openingQuote) {
+                    attrValue += char;
+                } else {
                     emitData(Type.attributeValue, attrValue);
                     isClosing = true;
                     state = State.tagEnd;
-                } else {
-                    attrValue += char;
-                }
-            },
-            [Action.doubleQuote]: (char) => {
-                if (quoteStyle === 2) {
-                    emitData(Type.attributeValue, attrValue);
-                    state = State.attributeNameStart;
-                } else {
-                    attrValue += char;
                 }
             },
             [Action.char]: (char) => (attrValue += char),
         },
     };
 
-    const next = (char) => {
-        options.debug && console.log(state, char);
+    const step = (char) => {
+        if (options.debug) {
+            console.log(state, char);
+        }
         const actions = lexer.stateMachine[state];
-        const action = actions[getAction(char)]
-            || actions[Action.error]
-            || actions[Action.char];
+        const action = actions[getAction(char)] || actions[Action.error] || actions[Action.char];
         action(char);
     };
 
     lexer.write = (str) => {
         const len = str.length;
         for (let i = 0; i < len; i++) {
-            next(str[i]);
+            step(str[i]);
         }
     };
 

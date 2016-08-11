@@ -104,12 +104,8 @@ Console output (note the fixed open-tag value):
 ```
 ## To do (ordered by priority)
 
-- ES5 bundle with webpack
-- Stream interface (allow piping)
-- Prolog and document type declaration (now ignored)
-- XML Comments (now ignored)
 - CDATA (now ignored)
-- Entities
+- XML Comments (now ignored)
 
 ## License
 

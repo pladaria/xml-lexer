@@ -2,9 +2,14 @@
   "name": "xml-lexer",
   "version": "0.0.17",
   "description": "XML Lexer",
-  "main": "index.js",
+  "main": "dist/lexer.js",
   "scripts": {
-    "test": "node test/test.js"
+    "clean": "rimraf dist",
+    "prebuild": "npm run clean",
+    "build": "babel src --out-dir dist",
+    "pretest": "npm run build",
+    "test": "node test/test.js",
+    "prepublish": "npm test"
   },
   "keywords": [
     "xml",
@@ -20,6 +25,9 @@
     "eventemitter3": "^1.2.0"
   },
   "devDependencies": {
+    "babel-cli": "^6.11.4",
+    "babel-preset-es2015": "^6.13.2",
+    "rimraf": "^2.5.4",
     "tape": "^4.5.1"
   },
   "directories": {

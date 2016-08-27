@@ -4,26 +4,27 @@ const EventEmitter = require('eventemitter3');
 const noop = () => {};
 
 const State = {
-    data: Symbol('state-data'),
-    tagBegin: Symbol('state-tag-begin'),
-    tagName: Symbol('state-tag-name'),
-    tagEnd: Symbol('state-tag-end'),
-    attributeNameStart: Symbol('state-waiting-attribute'),
-    attributeName: Symbol('state-attribute-name'),
-    attributeNameEnd: Symbol('state-attribute-name-end'),
-    attributeValueBegin: Symbol('state-attribute-value-begin'),
-    attributeValue: Symbol('state-attribute-value'),
+    data: 'state-data',
+    cdata: 'state-cdata',
+    tagBegin: 'state-tag-begin',
+    tagName: 'state-tag-name',
+    tagEnd: 'state-tag-end',
+    attributeNameStart: 'state-attribute-name-start',
+    attributeName: 'state-attribute-name',
+    attributeNameEnd: 'state-attribute-name-end',
+    attributeValueBegin: 'state-attribute-value-begin',
+    attributeValue: 'state-attribute-value',
 };
 
 const Action = {
-    lt: Symbol('action-lt'),
-    gt: Symbol('action-gt'),
-    space: Symbol('action-space'),
-    equal: Symbol('action-equal'),
-    quote: Symbol('action-quote'),
-    slash: Symbol('action-slash'),
-    char: Symbol('action-char'),
-    error: Symbol('action-error'),
+    lt: 'action-lt',
+    gt: 'action-gt',
+    space: 'action-space',
+    equal: 'action-equal',
+    quote: 'action-quote',
+    slash: 'action-slash',
+    char: 'action-char',
+    error: 'action-error',
 };
 
 const Type = {
@@ -65,8 +66,8 @@ const create = (options) => {
     let isClosing = '';
     let openingQuote = '';
 
-    const emitData = (type, value) => {
-        // for now, ignore tags like: '?xml', '!DOCTYPE', '![CDATA[' or comments
+    const emit = (type, value) => {
+        // for now, ignore tags like: '?xml', '!DOCTYPE' or comments
         if (tagName[0] === '?' || tagName[0] === '!') {
             return;
         }
@@ -80,15 +81,26 @@ const create = (options) => {
     lexer.stateMachine = {
         [State.data]: {
             [Action.lt]: () => {
-                const text = data.trim();
-                if (text) {
-                    emitData(Type.text, text);
+                if (data) {
+                    emit(Type.text, data);
                 }
                 tagName = '';
                 isClosing = false;
                 state = State.tagBegin;
             },
-            [Action.char]: (char) => (data += char),
+            [Action.char]: (char) => {
+                data += char;
+            },
+        },
+        [State.cdata]: {
+            [Action.char]: (char) => {
+                data += char;
+                if (data.substr(-3) === ']]>') {
+                    emit(Type.text, data.slice(0, -3));
+                    data = '';
+                    state = State.data;
+                }
+            },
         },
         [State.tagBegin]: {
             [Action.space]: noop,
@@ -103,33 +115,38 @@ const create = (options) => {
         },
         [State.tagName]: {
             [Action.space]: () => {
-                if (tagName.length) {
-                    if (isClosing) {
-                        state = State.tagEnd;
-                    } else {
-                        state = State.attributeNameStart;
-                        emitData(Type.openTag, tagName);
-                    }
+                if (isClosing) {
+                    state = State.tagEnd;
+                } else {
+                    state = State.attributeNameStart;
+                    emit(Type.openTag, tagName);
                 }
             },
             [Action.gt]: () => {
                 if (isClosing) {
-                    emitData(Type.closeTag, tagName);
+                    emit(Type.closeTag, tagName);
                 } else {
-                    emitData(Type.openTag, tagName);
+                    emit(Type.openTag, tagName);
                 }
                 data = '';
                 state = State.data;
             },
             [Action.slash]: () => {
                 state = State.tagEnd;
-                emitData(Type.openTag, tagName);
+                emit(Type.openTag, tagName);
             },
-            [Action.char]: (char) => (tagName += char),
+            [Action.char]: (char) => {
+                tagName += char;
+                if (tagName === '![CDATA[') {
+                    state = State.cdata;
+                    data = '';
+                    tagName = '';
+                }
+            },
         },
         [State.tagEnd]: {
             [Action.gt]: () => {
-                emitData(Type.closeTag, tagName);
+                emit(Type.closeTag, tagName);
                 data = '';
                 state = State.data;
             },
@@ -151,39 +168,46 @@ const create = (options) => {
             },
         },
         [State.attributeName]: {
-            [Action.space]: () => (state = State.attributeNameEnd),
+            [Action.space]: () => {
+                state = State.attributeNameEnd;
+            },
             [Action.equal]: () => {
-                emitData(Type.attributeName, attrName);
+                emit(Type.attributeName, attrName);
                 state = State.attributeValueBegin;
             },
             [Action.gt]: () => {
                 attrValue = '';
-                emitData(Type.attributeName, attrName);
-                emitData(Type.attributeValue, attrValue);
+                emit(Type.attributeName, attrName);
+                emit(Type.attributeValue, attrValue);
                 state = State.data;
             },
             [Action.slash]: () => {
                 isClosing = true;
                 attrValue = '';
-                emitData(Type.attributeName, attrName);
-                emitData(Type.attributeValue, attrValue);
+                emit(Type.attributeName, attrName);
+                emit(Type.attributeValue, attrValue);
                 state = State.tagEnd;
             },
-            [Action.char]: (char) => (attrName += char),
+            [Action.char]: (char) => {
+                attrName += char;
+            },
         },
         [State.attributeNameEnd]: {
             [Action.space]: noop,
-            [Action.equal]: () => (state = State.attributeValueBegin),
+            [Action.equal]: () => {
+                emit(Type.attributeName, attrName);
+                state = State.attributeValueBegin;
+            },
             [Action.gt]: () => {
                 attrValue = '';
-                emitData(Type.attributeName, attrName);
-                emitData(Type.attributeValue, attrValue);
+                emit(Type.attributeName, attrName);
+                emit(Type.attributeValue, attrValue);
                 state = State.data;
             },
             [Action.char]: (char) => {
                 attrValue = '';
-                emitData(Type.attributeName, attrName);
-                emitData(Type.attributeValue, attrValue);
+                emit(Type.attributeName, attrName);
+                emit(Type.attributeValue, attrValue);
                 attrName = char;
                 state = State.attributeName;
             },
@@ -197,7 +221,7 @@ const create = (options) => {
             },
             [Action.gt]: () => {
                 attrValue = '';
-                emitData(Type.attributeValue, attrValue);
+                emit(Type.attributeValue, attrValue);
                 state = State.data;
             },
             [Action.char]: (char) => {
@@ -211,13 +235,13 @@ const create = (options) => {
                 if (openingQuote) {
                     attrValue += char;
                 } else {
-                    emitData(Type.attributeValue, attrValue);
+                    emit(Type.attributeValue, attrValue);
                     state = State.attributeNameStart;
                 }
             },
             [Action.quote]: (char) => {
                 if (openingQuote === char) {
-                    emitData(Type.attributeValue, attrValue);
+                    emit(Type.attributeValue, attrValue);
                     state = State.attributeNameStart;
                 } else {
                     attrValue += char;
@@ -227,7 +251,7 @@ const create = (options) => {
                 if (openingQuote) {
                     attrValue += char;
                 } else {
-                    emitData(Type.attributeValue, attrValue);
+                    emit(Type.attributeValue, attrValue);
                     state = State.data;
                 }
             },
@@ -235,12 +259,14 @@ const create = (options) => {
                 if (openingQuote) {
                     attrValue += char;
                 } else {
-                    emitData(Type.attributeValue, attrValue);
+                    emit(Type.attributeValue, attrValue);
                     isClosing = true;
                     state = State.tagEnd;
                 }
             },
-            [Action.char]: (char) => (attrValue += char),
+            [Action.char]: (char) => {
+                attrValue += char;
+            },
         },
     };
 

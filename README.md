@@ -5,9 +5,12 @@ Simple JavaScript Lexer for XML documents
 - Event driven API (SAX-like)
 - Works in Browser, WebWorkers, ServiceWorkers, Node.js or React Native
 - Fault tolerant
+- Handles CDATA
 - Easy to extend and fine tune (state machine is exposed in Lexer instances)
 
-If you are looking for a [XML Reader/Parser to convert XML documents into Javascript objects](https://github.com/pladaria/xml-reader), check my other project: [xml-reader](https://github.com/pladaria/xml-reader).
+If you are looking for a [XML Reader/Parser to convert XML documents into Javascript objects](https://github.com/pladaria/xml-reader), check my other projects:
+- [xml-reader](https://github.com/pladaria/xml-reader)
+- [xml-query](https://github.com/pladaria/xml-query)
 
 ## Install
 
@@ -102,10 +105,6 @@ Console output (note the fixed open-tag value):
 { type: 'close-tag', value: 'hello' }
 */
 ```
-## To do (ordered by priority)
-
-- CDATA (now ignored)
-- XML Comments (now ignored)
 
 ## License
 

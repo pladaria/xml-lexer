@@ -6,26 +6,27 @@ var EventEmitter = require('eventemitter3');
 var noop = function noop() {};
 
 var State = {
-    data: Symbol('state-data'),
-    tagBegin: Symbol('state-tag-begin'),
-    tagName: Symbol('state-tag-name'),
-    tagEnd: Symbol('state-tag-end'),
-    attributeNameStart: Symbol('state-waiting-attribute'),
-    attributeName: Symbol('state-attribute-name'),
-    attributeNameEnd: Symbol('state-attribute-name-end'),
-    attributeValueBegin: Symbol('state-attribute-value-begin'),
-    attributeValue: Symbol('state-attribute-value')
+    data: 'state-data',
+    cdata: 'state-cdata',
+    tagBegin: 'state-tag-begin',
+    tagName: 'state-tag-name',
+    tagEnd: 'state-tag-end',
+    attributeNameStart: 'state-attribute-name-start',
+    attributeName: 'state-attribute-name',
+    attributeNameEnd: 'state-attribute-name-end',
+    attributeValueBegin: 'state-attribute-value-begin',
+    attributeValue: 'state-attribute-value'
 };
 
 var Action = {
-    lt: Symbol('action-lt'),
-    gt: Symbol('action-gt'),
-    space: Symbol('action-space'),
-    equal: Symbol('action-equal'),
-    quote: Symbol('action-quote'),
-    slash: Symbol('action-slash'),
-    char: Symbol('action-char'),
-    error: Symbol('action-error')
+    lt: 'action-lt',
+    gt: 'action-gt',
+    space: 'action-space',
+    equal: 'action-equal',
+    quote: 'action-quote',
+    slash: 'action-slash',
+    char: 'action-char',
+    error: 'action-error'
 };
 
 var Type = {
@@ -71,8 +72,8 @@ var create = function create(options) {
     var isClosing = '';
     var openingQuote = '';
 
-    var emitData = function emitData(type, value) {
-        // for now, ignore tags like: '?xml', '!DOCTYPE', '![CDATA[' or comments
+    var emit = function emit(type, value) {
+        // for now, ignore tags like: '?xml', '!DOCTYPE' or comments
         if (tagName[0] === '?' || tagName[0] === '!') {
             return;
         }
@@ -84,45 +85,54 @@ var create = function create(options) {
     };
 
     lexer.stateMachine = (_lexer$stateMachine = {}, _defineProperty(_lexer$stateMachine, State.data, (_State$data = {}, _defineProperty(_State$data, Action.lt, function () {
-        var text = data.trim();
-        if (text) {
-            emitData(Type.text, text);
+        if (data) {
+            emit(Type.text, data);
         }
         tagName = '';
         isClosing = false;
         state = State.tagBegin;
     }), _defineProperty(_State$data, Action.char, function (char) {
-        return data += char;
-    }), _State$data)), _defineProperty(_lexer$stateMachine, State.tagBegin, (_State$tagBegin = {}, _defineProperty(_State$tagBegin, Action.space, noop), _defineProperty(_State$tagBegin, Action.char, function (char) {
+        data += char;
+    }), _State$data)), _defineProperty(_lexer$stateMachine, State.cdata, _defineProperty({}, Action.char, function (char) {
+        data += char;
+        if (data.substr(-3) === ']]>') {
+            emit(Type.text, data.slice(0, -3));
+            data = '';
+            state = State.data;
+        }
+    })), _defineProperty(_lexer$stateMachine, State.tagBegin, (_State$tagBegin = {}, _defineProperty(_State$tagBegin, Action.space, noop), _defineProperty(_State$tagBegin, Action.char, function (char) {
         tagName = char;
         state = State.tagName;
     }), _defineProperty(_State$tagBegin, Action.slash, function () {
         tagName = '';
         isClosing = true;
     }), _State$tagBegin)), _defineProperty(_lexer$stateMachine, State.tagName, (_State$tagName = {}, _defineProperty(_State$tagName, Action.space, function () {
-        if (tagName.length) {
-            if (isClosing) {
-                state = State.tagEnd;
-            } else {
-                state = State.attributeNameStart;
-                emitData(Type.openTag, tagName);
-            }
+        if (isClosing) {
+            state = State.tagEnd;
+        } else {
+            state = State.attributeNameStart;
+            emit(Type.openTag, tagName);
         }
     }), _defineProperty(_State$tagName, Action.gt, function () {
         if (isClosing) {
-            emitData(Type.closeTag, tagName);
+            emit(Type.closeTag, tagName);
         } else {
-            emitData(Type.openTag, tagName);
+            emit(Type.openTag, tagName);
         }
         data = '';
         state = State.data;
     }), _defineProperty(_State$tagName, Action.slash, function () {
         state = State.tagEnd;
-        emitData(Type.openTag, tagName);
+        emit(Type.openTag, tagName);
     }), _defineProperty(_State$tagName, Action.char, function (char) {
-        return tagName += char;
+        tagName += char;
+        if (tagName === '![CDATA[') {
+            state = State.cdata;
+            data = '';
+            tagName = '';
+        }
     }), _State$tagName)), _defineProperty(_lexer$stateMachine, State.tagEnd, (_State$tagEnd = {}, _defineProperty(_State$tagEnd, Action.gt, function () {
-        emitData(Type.closeTag, tagName);
+        emit(Type.closeTag, tagName);
         data = '';
         state = State.data;
     }), _defineProperty(_State$tagEnd, Action.char, noop), _State$tagEnd)), _defineProperty(_lexer$stateMachine, State.attributeNameStart, (_State$attributeNameS = {}, _defineProperty(_State$attributeNameS, Action.char, function (char) {
@@ -135,34 +145,35 @@ var create = function create(options) {
         isClosing = true;
         state = State.tagEnd;
     }), _State$attributeNameS)), _defineProperty(_lexer$stateMachine, State.attributeName, (_State$attributeName = {}, _defineProperty(_State$attributeName, Action.space, function () {
-        return state = State.attributeNameEnd;
+        state = State.attributeNameEnd;
     }), _defineProperty(_State$attributeName, Action.equal, function () {
-        emitData(Type.attributeName, attrName);
+        emit(Type.attributeName, attrName);
         state = State.attributeValueBegin;
     }), _defineProperty(_State$attributeName, Action.gt, function () {
         attrValue = '';
-        emitData(Type.attributeName, attrName);
-        emitData(Type.attributeValue, attrValue);
+        emit(Type.attributeName, attrName);
+        emit(Type.attributeValue, attrValue);
         state = State.data;
     }), _defineProperty(_State$attributeName, Action.slash, function () {
         isClosing = true;
         attrValue = '';
-        emitData(Type.attributeName, attrName);
-        emitData(Type.attributeValue, attrValue);
+        emit(Type.attributeName, attrName);
+        emit(Type.attributeValue, attrValue);
         state = State.tagEnd;
     }), _defineProperty(_State$attributeName, Action.char, function (char) {
-        return attrName += char;
+        attrName += char;
     }), _State$attributeName)), _defineProperty(_lexer$stateMachine, State.attributeNameEnd, (_State$attributeNameE = {}, _defineProperty(_State$attributeNameE, Action.space, noop), _defineProperty(_State$attributeNameE, Action.equal, function () {
-        return state = State.attributeValueBegin;
+        emit(Type.attributeName, attrName);
+        state = State.attributeValueBegin;
     }), _defineProperty(_State$attributeNameE, Action.gt, function () {
         attrValue = '';
-        emitData(Type.attributeName, attrName);
-        emitData(Type.attributeValue, attrValue);
+        emit(Type.attributeName, attrName);
+        emit(Type.attributeValue, attrValue);
         state = State.data;
     }), _defineProperty(_State$attributeNameE, Action.char, function (char) {
         attrValue = '';
-        emitData(Type.attributeName, attrName);
-        emitData(Type.attributeValue, attrValue);
+        emit(Type.attributeName, attrName);
+        emit(Type.attributeValue, attrValue);
         attrName = char;
         state = State.attributeName;
     }), _State$attributeNameE)), _defineProperty(_lexer$stateMachine, State.attributeValueBegin, (_State$attributeValue = {}, _defineProperty(_State$attributeValue, Action.space, noop), _defineProperty(_State$attributeValue, Action.quote, function (char) {
@@ -171,7 +182,7 @@ var create = function create(options) {
         state = State.attributeValue;
     }), _defineProperty(_State$attributeValue, Action.gt, function () {
         attrValue = '';
-        emitData(Type.attributeValue, attrValue);
+        emit(Type.attributeValue, attrValue);
         state = State.data;
     }), _defineProperty(_State$attributeValue, Action.char, function (char) {
         openingQuote = '';
@@ -181,12 +192,12 @@ var create = function create(options) {
         if (openingQuote) {
             attrValue += char;
         } else {
-            emitData(Type.attributeValue, attrValue);
+            emit(Type.attributeValue, attrValue);
             state = State.attributeNameStart;
         }
     }), _defineProperty(_State$attributeValue2, Action.quote, function (char) {
         if (openingQuote === char) {
-            emitData(Type.attributeValue, attrValue);
+            emit(Type.attributeValue, attrValue);
             state = State.attributeNameStart;
         } else {
             attrValue += char;
@@ -195,19 +206,19 @@ var create = function create(options) {
         if (openingQuote) {
             attrValue += char;
         } else {
-            emitData(Type.attributeValue, attrValue);
+            emit(Type.attributeValue, attrValue);
             state = State.data;
         }
     }), _defineProperty(_State$attributeValue2, Action.slash, function (char) {
         if (openingQuote) {
             attrValue += char;
         } else {
-            emitData(Type.attributeValue, attrValue);
+            emit(Type.attributeValue, attrValue);
             isClosing = true;
             state = State.tagEnd;
         }
     }), _defineProperty(_State$attributeValue2, Action.char, function (char) {
-        return attrValue += char;
+        attrValue += char;
     }), _State$attributeValue2)), _lexer$stateMachine);
 
     var step = function step(char) {

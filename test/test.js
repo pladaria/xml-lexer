@@ -1,7 +1,6 @@
 'use strict';
-const test = require('tape');
-
-const Lexer = require('..');
+const test = require('ava');
+const Lexer = require('../src/lexer.js');
 const Type = Lexer.Type;
 
 const assert = (t, lexer, xml, expected) => {
@@ -17,7 +16,7 @@ const assert = (t, lexer, xml, expected) => {
     }
 };
 
-test('happy case', t => {
+test.cb('happy case', t => {
     const lexer = Lexer.create();
     const xml = `<test>text</test>`;
     const expected = [
@@ -28,7 +27,7 @@ test('happy case', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('happy case chunked', t => {
+test.cb('happy case chunked', t => {
     const lexer = Lexer.create();
     const xml = `<test>text</test>`.split('');
     const expected = [
@@ -39,7 +38,7 @@ test('happy case chunked', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('single attribute without quotes', t => {
+test.cb('single attribute without quotes', t => {
     const lexer = Lexer.create();
     const xml = `<test a=1></test>`;
     const expected = [
@@ -51,7 +50,56 @@ test('single attribute without quotes', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('various attributes (single, double, no quotes, no value)', t => {
+test.cb('spaces around', t => {
+    const lexer = Lexer.create();
+    const xml = `<  test  foo  =  "bar baz"  >text< / test >`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.attributeName, value: 'foo'},
+        {type: Type.attributeValue, value: 'bar baz'},
+        {type: Type.text, value: 'text'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test.cb('slash breaking attribute', t => {
+    const lexer = Lexer.create();
+    const xml = `<test foo/>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.attributeName, value: 'foo'},
+        {type: Type.attributeValue, value: ''},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test.cb('tag closing before attribute value', t => {
+    const lexer = Lexer.create();
+    const xml = `<test foo ></test>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.attributeName, value: 'foo'},
+        {type: Type.attributeValue, value: ''},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test.cb('tag closing before attribute value (with equal)', t => {
+    const lexer = Lexer.create();
+    const xml = `<test foo=></test>`;
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.attributeName, value: 'foo'},
+        {type: Type.attributeValue, value: ''},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+});
+
+test.cb('various attributes (single, double, no quotes, no value)', t => {
     const lexer = Lexer.create();
     const xml = `<test a=0 b='1' c="2" d></test>`;
     const expected = [
@@ -69,7 +117,7 @@ test('various attributes (single, double, no quotes, no value)', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('various attributes without spaces', t => {
+test.cb('various attributes without spaces', t => {
     const lexer = Lexer.create();
     const xml = `<test a='1'b="2"c></test>`;
     const expected = [
@@ -85,7 +133,7 @@ test('various attributes without spaces', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('self closing tag', t => {
+test.cb('self closing tag', t => {
     const lexer = Lexer.create();
     const xml = `<test/>`;
     const expected = [
@@ -95,7 +143,7 @@ test('self closing tag', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('self closing tag with slash after attribute value', t => {
+test.cb('self closing tag with slash after attribute value', t => {
     const lexer = Lexer.create();
     const xml = `<test a=1/>`;
     const expected = [
@@ -107,7 +155,7 @@ test('self closing tag with slash after attribute value', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('slashes in attribute values', t => {
+test.cb('slashes in attribute values', t => {
     const lexer = Lexer.create();
     const xml = `<test a='/'b="/"/>`;
     const expected = [
@@ -121,7 +169,7 @@ test('slashes in attribute values', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('quotes inside quotes', t => {
+test.cb('quotes inside quotes', t => {
     const lexer = Lexer.create();
     const xml = `<test a='"'b="'"/>`;
     const expected = [
@@ -135,7 +183,7 @@ test('quotes inside quotes', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('gt in attribute values', t => {
+test.cb('gt in attribute values', t => {
     const lexer = Lexer.create();
     const xml = `<test a='>'b=">"/>`;
     const expected = [
@@ -149,7 +197,7 @@ test('gt in attribute values', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('lt in attribute values', t => {
+test.cb('lt in attribute values', t => {
     const lexer = Lexer.create();
     const xml = `<test a='<'b="<"/>`;
     const expected = [
@@ -163,7 +211,7 @@ test('lt in attribute values', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('attributes are ignored after slash in self closing tag', t => {
+test.cb('attributes are ignored after slash in self closing tag', t => {
     const lexer = Lexer.create();
     const xml = `<test/ a=0>`;
     const expected = [
@@ -173,7 +221,7 @@ test('attributes are ignored after slash in self closing tag', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('attributes are ignored in closing tag', t => {
+test.cb('attributes are ignored in closing tag', t => {
     const lexer = Lexer.create();
     const xml = `<test></test a=0>`;
     const expected = [
@@ -183,7 +231,7 @@ test('attributes are ignored in closing tag', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('ignore tags starting with ?', t => {
+test.cb('ignore tags starting with ?', t => {
     const lexer = Lexer.create();
     const xml = `<?xml foo=bar><test/>`;
     const expected = [
@@ -193,7 +241,7 @@ test('ignore tags starting with ?', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('ignore comments', t => {
+test.cb('ignore comments', t => {
     const lexer = Lexer.create();
     const xml = `<test><!-- comment --></test>`;
     const expected = [
@@ -203,17 +251,19 @@ test('ignore comments', t => {
     assert(t, lexer, xml, expected);
 });
 
-test('ignore CDATA', t => {
+test.cb('read CDATA', t => {
     const lexer = Lexer.create();
-    const xml = `<test><![CDATA[foo]]></test>`;
+    const xml = `<test><![CDATA[foo<bar>&bsp;baz]]><![CDATA[]><![CDATA[foo]]]]></test>`;
     const expected = [
         {type: Type.openTag, value: 'test'},
+        {type: Type.text, value: 'foo<bar>&bsp;baz'},
+        {type: Type.text, value: ']><![CDATA[foo]]'},
         {type: Type.closeTag, value: 'test'},
     ];
     assert(t, lexer, xml, expected);
 });
 
-test('ignore DOCTYPE', t => {
+test.cb('ignore DOCTYPE', t => {
     const lexer = Lexer.create();
     const xml = `<!DOCTYPE foo><test/>`;
     const expected = [
@@ -221,4 +271,42 @@ test('ignore DOCTYPE', t => {
         {type: Type.closeTag, value: 'test'},
     ];
     assert(t, lexer, xml, expected);
+});
+
+test.cb('debug mode prints stuff', t => {
+    const lexer = Lexer.create({debug: true});
+    const xml = `<test>text</test>`;
+    const logs = [];
+    const savedConsoleLog = console.log;
+    console.log = (...args) => logs.push(args);
+    const expected = [
+        {type: Type.openTag, value: 'test'},
+        {type: Type.text, value: 'text'},
+        {type: Type.closeTag, value: 'test'},
+    ];
+    assert(t, lexer, xml, expected);
+    console.log = savedConsoleLog;
+    const expectedLogs = [
+        ['state-data', '<'],
+        ['state-tag-begin', 't'],
+        ['state-tag-name', 'e'],
+        ['state-tag-name', 's'],
+        ['state-tag-name', 't'],
+        ['state-tag-name', '>'],
+        ['emit:', {type: 'open-tag', value: 'test'}],
+        ['state-data', 't'],
+        ['state-data', 'e'],
+        ['state-data', 'x'],
+        ['state-data', 't'],
+        ['state-data', '<'],
+        ['emit:', {type: 'text', value: 'text'}],
+        ['state-tag-begin', '/'],
+        ['state-tag-begin', 't'],
+        ['state-tag-name', 'e'],
+        ['state-tag-name', 's'],
+        ['state-tag-name', 't'],
+        ['state-tag-name', '>'],
+        ['emit:', {type: 'close-tag', value: 'test'}],
+    ];
+    t.deepEqual(logs, expectedLogs);
 });

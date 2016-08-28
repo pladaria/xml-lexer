@@ -1,8 +1,9 @@
-<center>
+<p align="center">
 <img src="https://raw.githubusercontent.com/pladaria/xml-lexer/master/logo.png" alt="XML-Lexer"/>
-</center>
-
 Simple JavaScript Lexer for XML documents
+</p>
+
+## Features
 - Very small, fast and simple! (~250 sloc)
 - Event driven API (SAX-like)
 - Works in Browser, WebWorkers, ServiceWorkers, Node.js or React Native

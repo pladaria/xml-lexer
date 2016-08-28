@@ -1,4 +1,6 @@
-# XML Lexer
+<center>
+<img src="https://raw.githubusercontent.com/pladaria/xml-lexer/master/logo.png" alt="XML-Lexer"/>
+</center>
 
 Simple JavaScript Lexer for XML documents
 - Very small, fast and simple! (~250 sloc)

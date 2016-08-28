@@ -1,6 +1,8 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/pladaria/xml-lexer/master/logo.png" alt="XML-Lexer"/>
-Simple JavaScript Lexer for XML documents
+  <img src="https://raw.githubusercontent.com/pladaria/xml-lexer/master/logo.png" alt="XML-Lexer"/>
+</p>
+<p align="center">
+  Simple JavaScript Lexer for XML documents
 </p>
 
 ## Features

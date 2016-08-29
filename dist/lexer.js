@@ -85,7 +85,7 @@ var create = function create(options) {
     };
 
     lexer.stateMachine = (_lexer$stateMachine = {}, _defineProperty(_lexer$stateMachine, State.data, (_State$data = {}, _defineProperty(_State$data, Action.lt, function () {
-        if (data) {
+        if (data.trim()) {
             emit(Type.text, data);
         }
         tagName = '';

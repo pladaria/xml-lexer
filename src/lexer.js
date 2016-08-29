@@ -81,7 +81,7 @@ const create = (options) => {
     lexer.stateMachine = {
         [State.data]: {
             [Action.lt]: () => {
-                if (data) {
+                if (data.trim()) {
                     emit(Type.text, data);
                 }
                 tagName = '';

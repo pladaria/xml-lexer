@@ -77,11 +77,11 @@ var create = function create(options) {
         if (tagName[0] === '?' || tagName[0] === '!') {
             return;
         }
-        var data = { type: type, value: value };
+        var event = { type: type, value: value };
         if (options.debug) {
-            console.log('emit:', data);
+            console.log('emit:', event);
         }
-        lexer.emit('data', data);
+        lexer.emit('data', event);
     };
 
     lexer.stateMachine = (_lexer$stateMachine = {}, _defineProperty(_lexer$stateMachine, State.data, (_State$data = {}, _defineProperty(_State$data, Action.lt, function () {
@@ -153,6 +153,7 @@ var create = function create(options) {
         attrValue = '';
         emit(Type.attributeName, attrName);
         emit(Type.attributeValue, attrValue);
+        data = '';
         state = State.data;
     }), _defineProperty(_State$attributeName, Action.slash, function () {
         isClosing = true;
@@ -169,6 +170,7 @@ var create = function create(options) {
         attrValue = '';
         emit(Type.attributeName, attrName);
         emit(Type.attributeValue, attrValue);
+        data = '';
         state = State.data;
     }), _defineProperty(_State$attributeNameE, Action.char, function (char) {
         attrValue = '';
@@ -183,6 +185,7 @@ var create = function create(options) {
     }), _defineProperty(_State$attributeValue, Action.gt, function () {
         attrValue = '';
         emit(Type.attributeValue, attrValue);
+        data = '';
         state = State.data;
     }), _defineProperty(_State$attributeValue, Action.char, function (char) {
         openingQuote = '';
@@ -207,6 +210,7 @@ var create = function create(options) {
             attrValue += char;
         } else {
             emit(Type.attributeValue, attrValue);
+            data = '';
             state = State.data;
         }
     }), _defineProperty(_State$attributeValue2, Action.slash, function (char) {

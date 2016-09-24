@@ -71,11 +71,11 @@ const create = (options) => {
         if (tagName[0] === '?' || tagName[0] === '!') {
             return;
         }
-        const data = {type, value};
+        const event = {type, value};
         if (options.debug) {
-            console.log('emit:', data);
+            console.log('emit:', event);
         }
-        lexer.emit('data', data);
+        lexer.emit('data', event);
     };
 
     lexer.stateMachine = {
@@ -179,6 +179,7 @@ const create = (options) => {
                 attrValue = '';
                 emit(Type.attributeName, attrName);
                 emit(Type.attributeValue, attrValue);
+                data = '';
                 state = State.data;
             },
             [Action.slash]: () => {
@@ -202,6 +203,7 @@ const create = (options) => {
                 attrValue = '';
                 emit(Type.attributeName, attrName);
                 emit(Type.attributeValue, attrValue);
+                data = '';
                 state = State.data;
             },
             [Action.char]: (char) => {
@@ -222,6 +224,7 @@ const create = (options) => {
             [Action.gt]: () => {
                 attrValue = '';
                 emit(Type.attributeValue, attrValue);
+                data = '';
                 state = State.data;
             },
             [Action.char]: (char) => {
@@ -252,6 +255,7 @@ const create = (options) => {
                     attrValue += char;
                 } else {
                     emit(Type.attributeValue, attrValue);
+                    data = '';
                     state = State.data;
                 }
             },

@@ -310,3 +310,22 @@ test.cb('debug mode prints stuff', t => {
     ];
     t.deepEqual(logs, expectedLogs);
 });
+
+test.cb('issue #6', t => {
+    const xml =
+        `<document>x
+            <title attr>Test</title>
+        </document>`;
+    const lexer = Lexer.create();
+    const expected = [
+        {type: Type.openTag, value: 'document'},
+        {type: Type.text, value: 'x\n            '},
+        {type: Type.openTag, value: 'title'},
+        {type: Type.attributeName, value: 'attr'},
+        {type: Type.attributeValue, value: ''},
+        {type: Type.text, value: 'Test'},
+        {type: Type.closeTag, value: 'title'},
+        {type: Type.closeTag, value: 'document'},
+    ];
+    assert(t, lexer, xml, expected);
+});

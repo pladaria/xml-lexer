@@ -63,7 +63,7 @@ const create = (options) => {
     let tagName = '';
     let attrName = '';
     let attrValue = '';
-    let isClosing = '';
+    let isClosing = false;
     let openingQuote = '';
 
     const emit = (type, value) => {
